@@ -1,24 +1,39 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import './bootstrap.css';
+import Cards from './containers/Cards';
+import Routes from './components/Routes';
+import Navbar from './components/Navbar';
+import { BrowserRouter as Router } from 'react-router-dom';
+import Searchbar from './components/Searchbar';
+import AppContext from './AppContext';
+import { getGenres } from './apis/movies';
 
 function App() {
+  const [genres, setGenres] = useState([]);
+  const [loggedInUser, setLoggedInUser] = useState({});
+  const context = {
+    genres,
+    loggedInUser,
+    onLogin: setLoggedInUser,
+  };
+  useEffect(() => {
+    // console.log('fetch genres')
+    getGenres()
+      .then((resp) => resp.json())
+      .then((resp) => setGenres(resp.data.genres))
+      .catch((err) => {
+        console.error(err);
+        alert('Sorry, we were unable to fetch the genre list');
+      });
+  }, []);
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Router>
+        <AppContext.Provider value={context}>
+          <Navbar />
+          <Routes />
+        </AppContext.Provider>
+      </Router>
     </div>
   );
 }
